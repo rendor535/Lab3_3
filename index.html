@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GIPHY – Random & Search</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Giphy </h1>
+      <p>gifen machen</a>.</p>
+      <div class="controls">
+        <label class="field">
+          <span>Rating</span>
+          <select id="rating" class="input">
+            <option value="g" selected>g</option>
+            <option value="pg">pg</option>
+            <option value="pg-13">pg-13</option>
+          </select>
+        </label>
+        <button id="btnRandom" class="btn">Losowy GIF</button>
+      </div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </header>
+
+    <!-- RANDOM -->
+    <section class="panel">
+      <h2 class="h2">Random</h2>
+      <div id="randomWrap" class="random-wrap">
+        <div class="placeholder">Kliknij „Losowy GIF”.</div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
