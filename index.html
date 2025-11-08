@@ -25,14 +25,39 @@
       <div id="status" class="status" aria-live="polite"></div>
     </header>
 
-    <!-- RANDOM -->
+    <!-- ghghmj -->
     <section class="panel">
       <h2 class="h2">Random</h2>
       <div id="randomWrap" class="random-wrap">
         <div class="placeholder">Kliknij „Losowy GIF”.</div>
       </div>
     </section>
+        <!-- wyszkuwian -->
+    <section class="panel">
+      <h2 class="h2">Search</h2>
 
+      <form id="searchForm" class="controls" autocomplete="off">
+        <label class="field grow">
+          <span>Fraza</span>
+          <input id="query" class="input" type="text" placeholder="np. cats, karate, sunset" />
+        </label>
+        <label class="field">
+          <span>Limit (1–50)</span>
+          <input id="limit" class="input" type="number" min="1" max="50" value="12" />
+        </label>
+        <button id="btnSearch" class="btn" type="submit">Szukaj</button>
+        <div class="pager">
+          <button id="btnPrev" class="btn btn-secondary" type="button" disabled>Poprzednia</button>
+          <button id="btnNext" class="btn btn-secondary" type="button" disabled>Następna</button>
+        </div>
+      </form>
+
+      <div id="searchStatus" class="status" aria-live="polite"></div>
+
+      <div id="grid" class="grid">
+        <!-- karty gifów -->
+      </div>
+    </section>
 
   </main>
 
