@@ -8,8 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const form           = document.getElementById('searchForm');
   const btnSearch      = document.getElementById('btnSearch');
-  const btnPrev        = document.getElementById('btnPrev');
-  const btnNext        = document.getElementById('btnNext');
   const queryEl        = document.getElementById('query');
   const limitEl        = document.getElementById('limit');
   const searchStatusEl = document.getElementById('searchStatus');
@@ -24,8 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchState = {
     q: '',
     limit: 12,
-    offset: 0,
-    total: 0,
     rating: 'g',
     lang: 'en'
   };
@@ -33,26 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // LISTENERY
   btnRandom.addEventListener('click', fetchRandomGifViaProxy);
 
-  if (form && btnSearch && btnPrev && btnNext && queryEl && limitEl && gridEl && searchStatusEl) {
+  if (form && btnSearch && queryEl && limitEl && gridEl && searchStatusEl) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       triggerSearch(true);
     });
-
-    btnPrev.addEventListener('click', async () => {
-      if (searchState.offset <= 0) return;
-      searchState.offset = Math.max(0, searchState.offset - searchState.limit);
-      await doSearch();
-    });
-
-    btnNext.addEventListener('click', async () => {
-      const next = searchState.offset + searchState.limit;
-      if (next >= searchState.total) return;
-      searchState.offset = next;
-      await doSearch();
-    });
   }
-
 
   async function fetchRandomGifViaProxy() {
     const rating = ratingEl.value || 'g';
@@ -120,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // WYSZUKIWARKA PRZEZ PROXY (BEZ API KEY)
-  async function triggerSearch(resetOffset = true) {
+  async function triggerSearch() {
     let q = (queryEl.value || '').trim();
     const limitVal = clamp(parseInt(limitEl.value, 10) || 12, 1, 50);
     const rating = ratingEl.value || 'g';
@@ -129,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     q = decodeURIComponent(encodeURIComponent(q));
 
-    if (resetOffset) searchState.offset = 0;
     searchState.q = q;
     searchState.limit = limitVal;
     searchState.rating = rating;
@@ -139,15 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function doSearch() {
     setDisabled(btnSearch, true);
-    setDisabled(btnPrev, true);
-    setDisabled(btnNext, true);
     setStatus(searchStatusEl, `Szukam „${searchState.q}”… (limit=${searchState.limit}, offset=${searchState.offset})`);
 
     try {
       const url = new URL('http://localhost:3000/giphy/search');
       url.searchParams.set('q',        searchState.q);
       url.searchParams.set('limit',    String(searchState.limit));
-      url.searchParams.set('offset',   String(searchState.offset));
       url.searchParams.set('rating',   searchState.rating);
       url.searchParams.set('lang',     searchState.lang);
 
@@ -165,26 +143,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json();
 
       const items = Array.isArray(json?.data) ? json.data : [];
-      const pag = json?.pagination || { total_count: 0, count: items.length, offset: searchState.offset };
-      searchState.total = Number(pag.total_count || 0);
 
       renderGrid(gridEl, items);
-      updatePager(btnPrev, btnNext, searchState);
 
-      const start = searchState.total ? searchState.offset + 1 : 0;
-      const end = Math.min(searchState.offset + items.length, searchState.total);
-      if (!items.length) {
-        setStatus(searchStatusEl, 'Brak wyników.', 'warn');
-      } else {
-        setStatus(searchStatusEl, `OK. Wyniki ${fmt(start)}–${fmt(end)} z ${fmt(searchState.total)}.`, 'ok');
-      }
+
+      setStatus(
+        searchStatusEl,
+        items.length ? `OK. Wyników: ${fmt(items.length)}.` : 'Brak wyników.',
+        items.length ? 'ok' : 'warn'
+      );
     } catch (e) {
       console.error(e);
       setStatus(searchStatusEl, 'Błąd podczas wyszukiwania.', 'error');
     } finally {
       setDisabled(btnSearch, false);
-      setDisabled(btnPrev, searchState.offset <= 0);
-      setDisabled(btnNext, searchState.offset + searchState.limit >= searchState.total);
     }
   }
 });
@@ -204,10 +176,7 @@ function escapeHtml(s){
     .replaceAll('"','&quot;')
     .replaceAll("'",'&#039;');
 }
-function updatePager(btnPrev, btnNext, state){
-  setDisabled(btnPrev, state.offset <= 0);
-  setDisabled(btnNext, state.offset + state.limit >= state.total);
-}
+
 function fmt(n){ return new Intl.NumberFormat('pl-PL').format(n); }
 function renderGrid(container, items){
   container.innerHTML = '';
